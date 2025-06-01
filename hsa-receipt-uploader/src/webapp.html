@@ -215,6 +215,7 @@
         });
 
         function displayRowInfo(info) {
+            console.log('Row info received:', info); // Debug information
             if (!info || !info.row) {
                 showError('No valid row selected. Please select a row with data.');
                 return;

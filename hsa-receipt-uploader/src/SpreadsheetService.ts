@@ -23,6 +23,8 @@ class SpreadsheetService {
       const range = sheet.getRange(rowIndex, 1, 1, 8); // Get all 8 columns
       const values = range.getValues()[0];
 
+      console.log(`Row ${rowIndex} values: ${JSON.stringify(values)}`)
+
       if (!values[ColumnIndex.PAYMENT_DATE]) {
         return null; // Empty row
       }
