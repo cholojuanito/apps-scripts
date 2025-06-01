@@ -32,6 +32,7 @@ class SpreadsheetService {
       const paymentDate = new Date(values[ColumnIndex.PAYMENT_DATE]);
       const year = paymentDate.getFullYear();
 
+      console.log(`Row ${rowIndex} payment date: ${paymentDate.toISOString()}`)
       return {
         paymentDate,
         patient: values[ColumnIndex.PATIENT]?.toString() || '',

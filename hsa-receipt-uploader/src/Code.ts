@@ -12,6 +12,26 @@ let spreadsheetService: SpreadsheetService;
 let driveService: DriveService;
 
 /**
+ * Utility function to serialize HSAReceiptRow for client-server communication
+ */
+function serializeRowData(row: HSAReceiptRow): SerializableHSAReceiptRow {
+  return {
+    ...row,
+    paymentDate: row.paymentDate.toISOString()
+  };
+}
+
+/**
+ * Utility function to deserialize row data from client
+ */
+function deserializeRowData(serializedRow: any): HSAReceiptRow {
+  return {
+    ...serializedRow,
+    paymentDate: new Date(serializedRow.paymentDate)
+  };
+}
+
+/**
  * Initialize services
  */
 function initializeServices(): void {
@@ -33,16 +53,35 @@ function doGet(): GoogleAppsScript.HTML.HtmlOutput {
 /**
  * Gets information about the currently active row in the spreadsheet
  */
-function getActiveRowInfo(): { sheetName: string; rowIndex: number; row: HSAReceiptRow | null } | null {
+function getActiveRowInfo(): { sheetName: string; rowIndex: number; row: SerializableHSAReceiptRow | null } | null {
   initializeServices();
-  return spreadsheetService.getActiveRowInfo();
+  const result = spreadsheetService.getActiveRowInfo();
+  
+  if (!result || !result.row) {
+    console.log('getActiveRowInfo returning null');
+    return {
+      sheetName: result?.sheetName || '',
+      rowIndex: result?.rowIndex || 0,
+      row: null
+    };
+  }
+  
+  // Serialize the row data for client-side compatibility
+  const serializedResult = {
+    sheetName: result.sheetName,
+    rowIndex: result.rowIndex,
+    row: serializeRowData(result.row)
+  };
+  
+  console.log('getActiveRowInfo returning:', JSON.stringify(serializedResult));
+  return serializedResult;
 }
 
 /**
  * Uploads a receipt file and organizes it in Drive
  */
 function uploadReceiptFile(
-  uploadData: FileUploadData, 
+  uploadData: any, 
   fileType: string, 
   sheetName: string, 
   rowIndex: number
@@ -51,10 +90,16 @@ function uploadReceiptFile(
   try {
     initializeServices();
     
+    // Deserialize the row data from client
+    const deserializedUploadData: FileUploadData = {
+      ...uploadData,
+      row: deserializeRowData(uploadData.row)
+    };
+    
     const fileTypeEnum = fileType === 'invoice' ? FileType.INVOICE : FileType.RECEIPT;
     
     // Upload the file
-    const file = driveService.uploadFile(uploadData, fileTypeEnum);
+    const file = driveService.uploadFile(deserializedUploadData, fileTypeEnum);
     
     // Mark receipt as uploaded in spreadsheet
     spreadsheetService.markReceiptUploaded(sheetName, rowIndex, true);
@@ -125,7 +170,6 @@ function onEdit(e: GoogleAppsScript.Events.SheetsOnEdit): void {
 
     // For simplicity, we'll determine the old row data by reversing the changes
     // In a real implementation, you might want to store previous values
-    const oldValues = e.oldValue ? [e.oldValue] : [];
     
     // Move/rename each existing file
     for (const file of existingFiles) {

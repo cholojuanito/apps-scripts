@@ -20,6 +20,20 @@ interface FileUploadData {
   row: HSAReceiptRow;
 }
 
+// Serializable version for client-server communication
+interface SerializableHSAReceiptRow {
+  paymentDate: string; // ISO string instead of Date
+  patient: string;
+  service: string;
+  cost: number;
+  company: string;
+  hsaApproved: boolean;
+  receiptUploaded: boolean;
+  paidOut: boolean;
+  rowIndex: number;
+  year: number;
+}
+
 interface DriveConfig {
   rootFolderName: string;
   basePath: string; // "financial/hsa-receipts"

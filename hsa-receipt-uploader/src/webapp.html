@@ -221,6 +221,11 @@
                 return;
             }
 
+            // Convert the date string back to a Date object
+            if (info.row.paymentDate) {
+                info.row.paymentDate = new Date(info.row.paymentDate);
+            }
+
             rowData = info;
             const row = info.row;
             
@@ -257,11 +262,17 @@
             reader.onload = function(e) {
                 const base64Content = e.target.result.split(',')[1]; // Remove data URL prefix
                 
+                // Create a serializable version of the row data
+                const serializableRow = {
+                    ...rowData.row,
+                    paymentDate: rowData.row.paymentDate.toISOString()
+                };
+
                 const uploadData = {
                     filename: file.name,
                     content: base64Content,
                     mimeType: file.type,
-                    row: rowData.row
+                    row: serializableRow
                 };
 
                 google.script.run
