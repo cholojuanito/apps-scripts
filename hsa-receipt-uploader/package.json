@@ -4,10 +4,9 @@
   "description": "HSA receipt management Google Apps Script with file upload web app",
   "main": "dist/Code.js",
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && cp src/*.html dist/ && cp appsscript.json dist/",
     "watch": "tsc --watch",
     "push": "clasp push",
-    "deploy": "npm run build && clasp push",
     "open": "clasp open"
   },
   "keywords": ["google-apps-script", "hsa", "receipts", "typescript"],
