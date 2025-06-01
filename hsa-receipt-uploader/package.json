@@ -1,0 +1,20 @@
+{
+  "name": "hsa-receipt-uploader",
+  "version": "1.0.0",
+  "description": "HSA receipt management Google Apps Script with file upload web app",
+  "main": "dist/Code.js",
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc --watch",
+    "push": "clasp push",
+    "deploy": "npm run build && clasp push",
+    "open": "clasp open"
+  },
+  "keywords": ["google-apps-script", "hsa", "receipts", "typescript"],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/google-apps-script": "^1.0.83",
+    "typescript": "^5.8.3"
+  }
+}

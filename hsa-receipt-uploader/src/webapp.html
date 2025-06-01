@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <base target="_top">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload HSA Receipt</title>
+    <style>
+        body {
+            font-family: 'Google Sans', Arial, sans-serif;
+            max-width: 500px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #f8f9fa;
+        }
+        .container {
+            background: white;
+            padding: 24px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #1a73e8;
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+        .row-info {
+            background: #e8f0fe;
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #1a73e8;
+        }
+        .row-info h3 {
+            margin: 0 0 8px 0;
+            color: #1a73e8;
+        }
+        .upload-section {
+            margin: 20px 0;
+        }
+        .file-type-selector {
+            margin: 16px 0;
+        }
+        .file-type-selector label {
+            margin-right: 20px;
+            display: inline-flex;
+            align-items: center;
+        }
+        .file-type-selector input[type="radio"] {
+            margin-right: 8px;
+        }
+        .file-input-container {
+            position: relative;
+            margin: 16px 0;
+        }
+        .file-input {
+            display: none;
+        }
+        .file-input-label {
+            display: inline-block;
+            padding: 12px 24px;
+            background: #1a73e8;
+            color: white;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .file-input-label:hover {
+            background: #1557b0;
+        }
+        .file-info {
+            margin-top: 12px;
+            padding: 8px;
+            background: #f0f0f0;
+            border-radius: 4px;
+            display: none;
+        }
+        .buttons {
+            margin-top: 24px;
+            display: flex;
+            gap: 12px;
+        }
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        .btn-primary {
+            background: #34a853;
+            color: white;
+        }
+        .btn-primary:hover {
+            background: #2d8e47;
+        }
+        .btn-primary:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .btn-secondary {
+            background: #f8f9fa;
+            color: #5f6368;
+            border: 1px solid #dadce0;
+        }
+        .btn-secondary:hover {
+            background: #f1f3f4;
+        }
+        .status {
+            margin-top: 16px;
+            padding: 12px;
+            border-radius: 4px;
+            display: none;
+        }
+        .status.success {
+            background: #e6f4ea;
+            color: #137333;
+            border: 1px solid #c8e6c9;
+        }
+        .status.error {
+            background: #fce8e6;
+            color: #d93025;
+            border: 1px solid #f8bbd9;
+        }
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Upload HSA Receipt</h1>
+        
+        <div class="row-info" id="rowInfo">
+            <h3>Row Information</h3>
+            <div id="rowDetails">Loading...</div>
+        </div>
+
+        <div class="upload-section">
+            <div class="file-type-selector">
+                <label>
+                    <input type="radio" name="fileType" value="receipt" checked>
+                    Receipt
+                </label>
+                <label>
+                    <input type="radio" name="fileType" value="invoice">
+                    Invoice
+                </label>
+            </div>
+
+            <div class="file-input-container">
+                <label for="fileInput" class="file-input-label">
+                    Choose File
+                </label>
+                <input type="file" id="fileInput" class="file-input" accept=".pdf,.jpg,.jpeg,.png">
+                <div class="file-info" id="fileInfo"></div>
+            </div>
+        </div>
+
+        <div class="loading" id="loading">
+            <p>Uploading file...</p>
+        </div>
+
+        <div class="buttons">
+            <button class="btn btn-primary" id="uploadBtn" disabled>Upload Receipt</button>
+            <button class="btn btn-secondary" id="cancelBtn">Cancel</button>
+        </div>
+
+        <div class="status" id="status"></div>
+    </div>
+
+    <script>
+        let selectedFile = null;
+        let rowData = null;
+
+        // Load row information when the page loads
+        window.addEventListener('load', function() {
+            google.script.run
+                .withSuccessHandler(displayRowInfo)
+                .withFailureHandler(showError)
+                .getActiveRowInfo();
+        });
+
+        // File input handler
+        document.getElementById('fileInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                selectedFile = file;
+                showFileInfo(file);
+                document.getElementById('uploadBtn').disabled = false;
+            } else {
+                selectedFile = null;
+                hideFileInfo();
+                document.getElementById('uploadBtn').disabled = true;
+            }
+        });
+
+        // Upload button handler
+        document.getElementById('uploadBtn').addEventListener('click', function() {
+            if (!selectedFile || !rowData) {
+                showError('No file selected or row data missing');
+                return;
+            }
+
+            const fileType = document.querySelector('input[name="fileType"]:checked').value;
+            uploadFile(selectedFile, fileType);
+        });
+
+        // Cancel button handler
+        document.getElementById('cancelBtn').addEventListener('click', function() {
+            google.script.host.close();
+        });
+
+        function displayRowInfo(info) {
+            if (!info || !info.row) {
+                showError('No valid row selected. Please select a row with data.');
+                return;
+            }
+
+            rowData = info;
+            const row = info.row;
+            
+            document.getElementById('rowDetails').innerHTML = `
+                <strong>Date:</strong> ${formatDate(row.paymentDate)}<br>
+                <strong>Patient:</strong> ${row.patient}<br>
+                <strong>Service:</strong> ${row.service}<br>
+                <strong>Cost:</strong> $${Math.abs(row.cost).toFixed(2)}<br>
+                <strong>Company:</strong> ${row.company}<br>
+                <strong>HSA Approved:</strong> ${row.hsaApproved ? 'Yes' : 'No'}
+            `;
+        }
+
+        function showFileInfo(file) {
+            const fileInfo = document.getElementById('fileInfo');
+            const sizeKB = (file.size / 1024).toFixed(1);
+            fileInfo.innerHTML = `
+                <strong>Selected:</strong> ${file.name}<br>
+                <strong>Size:</strong> ${sizeKB} KB<br>
+                <strong>Type:</strong> ${file.type}
+            `;
+            fileInfo.style.display = 'block';
+        }
+
+        function hideFileInfo() {
+            document.getElementById('fileInfo').style.display = 'none';
+        }
+
+        function uploadFile(file, fileType) {
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('uploadBtn').disabled = true;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const base64Content = e.target.result.split(',')[1]; // Remove data URL prefix
+                
+                const uploadData = {
+                    filename: file.name,
+                    content: base64Content,
+                    mimeType: file.type,
+                    row: rowData.row
+                };
+
+                google.script.run
+                    .withSuccessHandler(uploadSuccess)
+                    .withFailureHandler(uploadError)
+                    .uploadReceiptFile(uploadData, fileType, rowData.sheetName, rowData.rowIndex);
+            };
+            
+            reader.readAsDataURL(file);
+        }
+
+        function uploadSuccess(result) {
+            document.getElementById('loading').style.display = 'none';
+            showStatus('File uploaded successfully!', 'success');
+            
+            setTimeout(function() {
+                google.script.host.close();
+            }, 2000);
+        }
+
+        function uploadError(error) {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('uploadBtn').disabled = false;
+            showError('Upload failed: ' + error.toString());
+        }
+
+        function showStatus(message, type) {
+            const status = document.getElementById('status');
+            status.textContent = message;
+            status.className = 'status ' + type;
+            status.style.display = 'block';
+        }
+
+        function showError(message) {
+            showStatus(message, 'error');
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString();
+        }
+    </script>
+</body>
+</html>
