@@ -102,7 +102,9 @@ function uploadReceiptFile(
     const file = driveService.uploadFile(deserializedUploadData, fileTypeEnum);
     
     // Mark receipt as uploaded in spreadsheet
-    spreadsheetService.markReceiptUploaded(sheetName, rowIndex, true);
+    if (fileTypeEnum === FileType.RECEIPT) {
+        spreadsheetService.markReceiptUploaded(sheetName, rowIndex, true);
+    }
     
     return {
       success: true,
