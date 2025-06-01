@@ -94,6 +94,7 @@ class SpreadsheetService {
 
       const row = this.getRowData(sheetName, rowIndex);
       
+      console.log(`Active row info: ${JSON.stringify({ rowIndex, row })}`)
       return {
         sheetName,
         rowIndex,
