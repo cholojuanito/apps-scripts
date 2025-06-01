@@ -6,6 +6,7 @@ class SpreadsheetService {
       this.spreadsheet = SpreadsheetApp.openById(spreadsheetId);
     } else {
       this.spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
+      console.log(`Using spreadsheet ${this.spreadsheet.getName()}`);
     }
   }
 
@@ -76,6 +77,7 @@ class SpreadsheetService {
       const activeRange = this.spreadsheet.getActiveRange();
       
       if (!activeSheet || !activeRange) {
+        console.log('No active sheet or range found')
         return null;
       }
 
@@ -84,6 +86,7 @@ class SpreadsheetService {
 
       // Skip if it's the header row or the "Totals" sheet
       if (rowIndex <= 1 || sheetName === 'Totals') {
+        console.log('Skipping header row or "Totals" sheet')
         return null;
       }
 
