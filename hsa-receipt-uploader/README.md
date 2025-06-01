@@ -95,18 +95,11 @@ Alternatively, update your `.clasp.json` to point to the `dist` directory:
 }
 ```
 
-### 8. Deploy the project
+### 8. Push project changes
 ```bash
-npm run deploy
+npm run build && npm run push
 ```
-
-### 9. Set up the web app HTML file
-
-In the Google Apps Script editor:
-1. Click the "+" next to "Files"
-2. Select "HTML"
-3. Name it "webapp"
-4. Replace the content with the HTML from `dist/webapp.html`
+If you make changes to the appsscript.json file you will need to use `clasp push -f` to force the update. A likely indicator this is an issue is when `npm run push` hangs for a while.
 
 ### 10. Set up triggers and permissions
 
