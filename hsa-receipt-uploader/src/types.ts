@@ -35,9 +35,7 @@ interface SerializableHSAReceiptRow {
 }
 
 interface DriveConfig {
-  rootFolderName: string;
   basePath: string; // "financial/hsa-receipts"
-  computersFolderName?: string; // "Computers/My Computers"
 }
 
 interface FolderStructure {

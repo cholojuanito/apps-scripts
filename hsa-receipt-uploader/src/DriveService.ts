@@ -92,19 +92,6 @@ class DriveService {
    * Gets or creates the root folder for HSA receipts
    */
   private getRootFolder(): GoogleAppsScript.Drive.Folder {
-    // Try to find in "Computers/My Computers" first if specified
-    if (this.config.computersFolderName) {
-      try {
-        const computersFolder = this.findFolderByPath(this.config.computersFolderName);
-        if (computersFolder) {
-          return this.getOrCreateFolderPath(computersFolder, this.config.basePath);
-        }
-      } catch (e) {
-        console.warn(`Could not access ${this.config.computersFolderName}, falling back to regular Drive`);
-      }
-    }
-
-    // Fallback to regular Drive root
     const driveRoot = DriveApp.getRootFolder();
     return this.getOrCreateFolderPath(driveRoot, this.config.basePath);
   }

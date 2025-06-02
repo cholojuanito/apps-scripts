@@ -2,9 +2,7 @@
 
 // Configuration
 const DRIVE_CONFIG: DriveConfig = {
-  rootFolderName: 'HSA Receipts',
   basePath: 'financial/hsa-receipts',
-  computersFolderName: 'Computers/My Computers' // Optional: will fallback to regular Drive if not accessible
 };
 
 // Global services
@@ -105,7 +103,7 @@ function uploadReceiptFile(
     if (fileTypeEnum === FileType.RECEIPT) {
         spreadsheetService.markReceiptUploaded(sheetName, rowIndex, true);
     }
-    
+
     return {
       success: true,
       fileId: file.getId(),

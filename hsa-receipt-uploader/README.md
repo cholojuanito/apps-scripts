@@ -150,9 +150,7 @@ You can modify the Drive folder structure by editing the `DRIVE_CONFIG` in `src/
 
 ```typescript
 const DRIVE_CONFIG: DriveConfig = {
-  rootFolderName: 'HSA Receipts',
   basePath: 'financial/hsa-receipts',
-  computersFolderName: 'Computers/My Computers' // Optional
 };
 ```
 
