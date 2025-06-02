@@ -6,7 +6,7 @@
   "scripts": {
     "build": "tsc && cp src/*.html dist/ && cp appsscript.json dist/",
     "watch": "tsc --watch",
-    "push": "clasp push",
+    "push": "clasp push -f",
     "open": "clasp open"
   },
   "keywords": ["google-apps-script", "hsa", "receipts", "typescript"],
